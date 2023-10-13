@@ -16,8 +16,10 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 
 from data import get_metadata, get_dataset, fix_legacy_dict
 import unets
+import datetime
 
 unsqueeze3x = lambda x: x[..., None, None, None]
+dist.init_process_group(backend='gloo', timeout=datetime.timedelta(seconds=5400))
 
 
 class GuassianDiffusion:
@@ -346,7 +348,7 @@ def main():
     )
 
     # misc
-    parser.add_argument("--save-dir", type=str, default="./trained_models/")
+    parser.add_argument("--save_dir", type=str, default="./trained_models/")
     parser.add_argument("--local_rank", default=0, type=int)
     parser.add_argument("--seed", default=112233, type=int)
 
@@ -358,6 +360,7 @@ def main():
     torch.cuda.set_device(args.device)
     torch.manual_seed(args.seed + args.local_rank)
     np.random.seed(args.seed + args.local_rank)
+    if not os.path.exists(args.save_dir): os.mkdir(args.save_dir)
     if args.local_rank == 0:
         print(args)
 
